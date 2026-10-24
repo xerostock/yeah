@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import Stick3D from './Stick3D.jsx'
 
 const ACCENT = '#ff1493'
 const LENGTHS = ['104cm', '101cm', '96cm', '92cm', '87cm', '82cm']
@@ -53,16 +54,6 @@ function Swatches({ title, items, value, set }) {
     </div></section>
 }
 
-function Preview({ shaft, blade, grip, text, shape }) {
-  return <svg viewBox="0 0 400 500" style={{ width: '100%', height: '100%', maxHeight: '70vh' }}>
-    <rect x="190" y="20" width="22" height="120" rx={shape === 'Round' ? 11 : 6} fill={grip.color} stroke="#000" />
-    <rect x="192" y="140" width="18" height="250" rx={shape === 'Round' ? 9 : 4} fill="#222" stroke={shaft.color} strokeWidth="2" />
-    <line x1="201" y1="150" x2="201" y2="380" stroke={shaft.color} strokeWidth="3" />
-    <text x="201" y="300" fill="#fff" fontSize="12" fontWeight="700" textAnchor="middle" transform="rotate(-90 201 300)">{text}</text>
-    <path d="M192 385 L210 385 L215 420 Q200 470 120 470 Q100 468 102 455 Q150 445 190 420 Z" fill={blade.color} stroke="#000" />
-  </svg>
-}
-
 function App() {
   const [len, setLen] = useState('104cm'); const [hand, setHand] = useState('Left'); const [shape, setShape] = useState('Round')
   const [s, setS] = useState(0); const [b, setB] = useState(0); const [g, setG] = useState(0); const [text, setText] = useState('')
@@ -72,9 +63,9 @@ function App() {
   return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
     <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
       <div style={{ flex: 1, background: '#232323', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ position: 'absolute', top: 16, left: 0, right: 0, textAlign: 'center', fontWeight: 800, letterSpacing: 3, fontStyle: 'italic' }}>CUSTOM STICK</div>
-        <button onClick={reset} style={{ position: 'absolute', top: 16, left: 16, background: 'none', color: '#aaa', border: '1px solid #444', borderRadius: 4, padding: '6px 10px', cursor: 'pointer' }}>Reset</button>
-        <Preview shaft={SHAFTS[s]} blade={BLADES[b]} grip={GRIPS[g]} text={text} shape={shape} />
+        <div style={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', top: 16, left: 0, right: 0, textAlign: 'center', fontWeight: 800, letterSpacing: 3, fontStyle: 'italic' }}>CUSTOM STICK</div>
+        <button onClick={reset} style={{ position: 'absolute', zIndex: 1, top: 16, left: 16, background: 'none', color: '#aaa', border: '1px solid #444', borderRadius: 4, padding: '6px 10px', cursor: 'pointer' }}>Reset</button>
+        <Stick3D shaft={SHAFTS[s]} blade={BLADES[b]} grip={GRIPS[g]} text={text} shape={shape} accent={ACCENT} />
       </div>
       <div style={{ width: 420, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Pills title="Length" items={LENGTHS} value={len} set={setLen} />
