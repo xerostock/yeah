@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 function textTexture(text, accent) {
   const c = document.createElement('canvas')
@@ -71,6 +72,17 @@ export default function Stick3D({ shaft, blade, grip, text, shape, accent }) {
     bladeMesh.position.y = -0.375
     bladeMesh.rotation.y = Math.PI / 2
     stick.add(bladeMesh)
+
+    // If a custom model exists at /models/stick.glb, use it instead of the built-in stick.
+    new GLTFLoader().load('/models/stick.glb', (gltf) => {
+      const model = gltf.scene
+      const box = new THREE.Box3().setFromObject(model)
+      const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3())
+      const k = 1.1 / Math.max(size.x, size.y, size.z)
+      model.scale.setScalar(k)
+      model.position.sub(center.multiplyScalar(k))
+      stick.clear(); stick.rotation.z = 0; stick.add(model)
+    }, undefined, () => {})
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target.set(0, 0, 0)
