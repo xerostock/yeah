@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 function textTexture(text, accent) {
@@ -20,18 +21,41 @@ function textTexture(text, accent) {
 }
 
 function bladeGeometry() {
-  // Side profile of a hooked blade, extruded to thickness.
+  // Original hooked blade profile with perforations, extruded and bevelled.
   const s = new THREE.Shape()
-  s.moveTo(0, 0)
-  s.lineTo(0.035, 0)
-  s.bezierCurveTo(0.05, -0.12, 0.02, -0.2, -0.08, -0.24)
-  s.bezierCurveTo(-0.18, -0.27, -0.3, -0.26, -0.33, -0.23)
-  s.bezierCurveTo(-0.34, -0.2, -0.3, -0.18, -0.22, -0.17)
-  s.bezierCurveTo(-0.1, -0.15, -0.03, -0.1, -0.035, 0)
-  s.lineTo(0, 0)
-  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.012, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 3, curveSegments: 32 })
-  geo.translate(0, 0, -0.006)
+  s.moveTo(-0.02, 0.03)
+  s.lineTo(0.02, 0.03)
+  s.bezierCurveTo(0.03, -0.04, 0.03, -0.1, 0.0, -0.15)
+  s.bezierCurveTo(-0.06, -0.22, -0.2, -0.25, -0.3, -0.235)
+  s.bezierCurveTo(-0.335, -0.228, -0.34, -0.2, -0.325, -0.175)
+  s.bezierCurveTo(-0.3, -0.14, -0.2, -0.13, -0.12, -0.11)
+  s.bezierCurveTo(-0.05, -0.09, -0.025, -0.04, -0.02, 0.03)
+  const holes = [[-0.04, -0.135, 0.012], [-0.09, -0.16, 0.014], [-0.145, -0.175, 0.014], [-0.2, -0.185, 0.013], [-0.255, -0.19, 0.011], [-0.012, -0.08, 0.009]]
+  for (const [x, y, r] of holes) {
+    const h = new THREE.Path()
+    h.absellipse(x, y, r * 1.5, r, 0, Math.PI * 2, false, -0.3)
+    s.holes.push(h)
+  }
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.006, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 4, curveSegments: 48 })
+  geo.translate(0, 0, -0.003)
+  // Curve the blade face slightly (heel-to-toe hook).
+  const p = geo.attributes.position
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, p.getZ(i) + x * x * 0.45) }
+  geo.computeVertexNormals()
   return geo
+}
+
+function gripTexture() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 1024
+  const g = c.getContext('2d')
+  g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 1024)
+  for (let y = -256; y < 1280; y += 22) {
+    g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 5
+    g.beginPath(); g.moveTo(0, y); g.lineTo(256, y + 256); g.stroke()
+  }
+  for (let i = 0; i < 6000; i++) { g.fillStyle = `rgba(0,0,0,${Math.random() * 0.12})`; g.fillRect(Math.random() * 256, Math.random() * 1024, 2, 2) }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace
+  return t
 }
 
 export default function Stick3D({ shaft, blade, grip, text, shape, accent }) {
@@ -47,30 +71,51 @@ export default function Stick3D({ shaft, blade, grip, text, shape, accent }) {
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 50)
     camera.position.set(1.0, 0.2, 2.7)
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x333333, 1.6))
-    const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(2, 3, 2); scene.add(key)
-    const rim = new THREE.DirectionalLight(0xffffff, 1); rim.position.set(-2, 1, -2); scene.add(rim)
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.85
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+    const key = new THREE.DirectionalLight(0xffffff, 2.5); key.position.set(1.5, 3, 2); key.castShadow = true
+    key.shadow.mapSize.set(2048, 2048); key.shadow.camera.left = key.shadow.camera.bottom = -1; key.shadow.camera.right = key.shadow.camera.top = 1
+    scene.add(key)
+
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({ opacity: 0.35 }))
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -0.62; floor.receiveShadow = true
+    scene.add(floor)
 
     const stick = new THREE.Group()
-    stick.rotation.z = -0.35
+    stick.rotation.z = -0.3
     scene.add(stick)
+    const cast = (m) => { m.castShadow = true; return m }
 
-    const shaftMat = new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.2 })
-    const shaftMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.75, 48, 1, true), shaftMat)
+    // Tapered composite shaft: wider top, slimmer near the blade.
+    const shaftMat = new THREE.MeshPhysicalMaterial({ roughness: 0.3, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.08 })
+    const shaftMesh = cast(new THREE.Mesh(new THREE.CylinderGeometry(0.0145, 0.0125, 0.8, 64, 1, true), shaftMat))
+    shaftMesh.position.y = -0.02
     stick.add(shaftMesh)
 
-    const gripMat = new THREE.MeshStandardMaterial({ roughness: 0.9 })
-    const gripMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.0165, 0.0165, 0.3, 48), gripMat)
-    gripMesh.position.y = 0.52
+    // Wrapped grip with texture, raised edge and end cap.
+    const gripMat = new THREE.MeshStandardMaterial({ roughness: 0.85, map: gripTexture(), bumpMap: gripTexture(), bumpScale: 2 })
+    const gripMesh = cast(new THREE.Mesh(new THREE.CylinderGeometry(0.0168, 0.0158, 0.28, 64), gripMat))
+    gripMesh.position.y = 0.5
     stick.add(gripMesh)
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.0175, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), gripMat)
-    cap.position.y = 0.67
-    stick.add(cap)
+    const edgeMat = new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.5 })
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.0162, 0.0018, 12, 64), edgeMat)
+    ring.rotation.x = Math.PI / 2; ring.position.y = 0.36; stick.add(ring)
+    const cap = cast(new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.0172, 0.018, 64), edgeMat))
+    cap.position.y = 0.648; stick.add(cap)
+    const capTop = new THREE.Mesh(new THREE.SphereGeometry(0.019, 48, 12, 0, Math.PI * 2, 0, Math.PI / 2), edgeMat)
+    capTop.scale.y = 0.3; capTop.position.y = 0.657; stick.add(capTop)
 
-    const bladeMat = new THREE.MeshStandardMaterial({ roughness: 0.45, side: THREE.DoubleSide })
-    const bladeMesh = new THREE.Mesh(bladeGeometry(), bladeMat)
-    bladeMesh.position.y = -0.375
-    bladeMesh.rotation.y = Math.PI / 2
+    // Throat collar joining shaft and blade.
+    const collar = cast(new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.016, 0.05, 48), edgeMat))
+    collar.position.y = -0.43; stick.add(collar)
+
+    const bladeMat = new THREE.MeshPhysicalMaterial({ roughness: 0.4, clearcoat: 0.5, clearcoatRoughness: 0.3, side: THREE.DoubleSide })
+    const bladeMesh = cast(new THREE.Mesh(bladeGeometry(), bladeMat))
+    bladeMesh.position.y = -0.44
+    bladeMesh.rotation.y = 0.45
     stick.add(bladeMesh)
 
     // If a custom model exists at /models/stick.glb, use it instead of the built-in stick.
@@ -121,6 +166,7 @@ export default function Stick3D({ shaft, blade, grip, text, shape, accent }) {
     tex.rotation = Math.PI / 2; tex.center.set(0.5, 0.5)
     p.shaftMat.map = tex; p.shaftMat.needsUpdate = true
     p.gripMat.color.set(grip.color)
+    p.gripMat.needsUpdate = true
     p.bladeMat.color.set(blade.color)
     p.shaftMesh.scale.set(shape === 'Oval' ? 1.3 : 1, 1, shape === 'Oval' ? 0.8 : 1)
   }, [shaft, blade, grip, text, shape, accent])
