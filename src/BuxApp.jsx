@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './bux.css'
 import ProductPage, { CONFIG } from './ProductPage.jsx'
 import OptionPage, { OPTS, fromPrice } from './OptionPage.jsx'
+import SellPage from './SellPage.jsx'
 import { GuidesPage, GuidePage, DiscordPage, CartPage, CheckoutPage, INVITE, PAY } from './Pages.jsx'
 
 const I = {
@@ -27,13 +28,15 @@ const PRODUCTS = [
 ]
 PRODUCTS.forEach(p => { if (OPTS[p.id]) p.price = fromPrice(p.id) })
 const GAMES = { roblox: 'Roblox', fortnite: 'Fortnite' }
+// Placeholder vouches - replace with real ones from your Discord vouch channel
+// [name, text, product id, days ago, avatar url (optional)]
 const REVIEWS = [
-  ['jxke', 'Got my 10k robux in like 3 minutes, legit.', 'Robux'],
-  ['luna.rbx', 'Best rates I have found, staff was super helpful in the ticket.', 'Limiteds'],
-  ['tyler_ftn', 'Smooth V-Bucks purchase, will buy again.', 'V-Bucks'],
-  ['mxrk', 'Fast delivery on my MM2 set, 10/10.', 'Game Items'],
-  ['zayyy', 'Trusted. 5th order now, never had an issue.', 'Robux'],
-  ['kira', 'V-Bucks arrived instantly. Thanks!', 'V-Bucks'],
+  ['jxke', 'Got my 10k robux in like 3 minutes, legit.', 'robux', 1],
+  ['luna.rbx', 'Best rates I have found, staff was super helpful in the ticket.', 'limiteds', 2],
+  ['tyler_ftn', 'Smooth V-Bucks purchase, will buy again.', 'vbucks', 3],
+  ['mxrk', 'Fast delivery on my MM2 set, 10/10.', 'game-items', 4],
+  ['zayyy', 'Trusted. 5th order now, never had an issue.', 'robux', 5],
+  ['kira', 'V-Bucks arrived instantly. Thanks!', 'vbucks', 6],
 ]
 const money = n => '$' + n.toFixed(2)
 
@@ -82,6 +85,7 @@ export default function BuxApp() {
       <nav className="nav-links">
         <a className={!game ? 'on' : ''} href="#" onClick={() => { setGame(null); setPage(null) }}>Shop</a>
         {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => { setGame(k); setPage(null) }}>{v}</a>)}
+        <a className={page === 'sell' ? 'on' : ''} href="#" onClick={() => go('sell')}>Sell</a>
         <a className={typeof page === 'string' && page.startsWith('guide') ? 'on' : ''} href="#" onClick={() => go('guides')}>Guides</a>
       </nav>
       <div className="nav-search"><span className="ic"><Ic n="search" s={18} /></span><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /></div>
@@ -93,14 +97,14 @@ export default function BuxApp() {
       </div>
     </div></header>
 
-    <main>{page === 'guides' ? <GuidesPage go={go} /> : typeof page === 'string' && page.startsWith('guide:') ? <GuidePage key={page} slug={page.slice(6)} go={go} /> : page === 'discord' ? <DiscordPage go={go} /> : page === 'cart' ? <CartPage cart={cart} setCart={setCart} go={go} /> : page === 'checkout' ? <CheckoutPage cart={cart} setCart={setCart} go={go} user={user} setUser={setUser} /> : page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
+    <main>{page === 'sell' ? <SellPage go={go} /> : page === 'guides' ? <GuidesPage go={go} /> : typeof page === 'string' && page.startsWith('guide:') ? <GuidePage key={page} slug={page.slice(6)} go={go} /> : page === 'discord' ? <DiscordPage go={go} /> : page === 'cart' ? <CartPage cart={cart} setCart={setCart} go={go} /> : page === 'checkout' ? <CheckoutPage cart={cart} setCart={setCart} go={go} user={user} setUser={setUser} /> : page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
       <section className="hero wrap">
         <div className="statuspill"><span className="dot"></span>Online <span className="eta">· ~5 min delivery</span></div>
         <h1><span className="grad">The Premium Game Marketplace</span></h1>
         <p className="sub">Robux, Limiteds, accounts, V-Bucks &amp; more - the best rates, instant delivery, fulfilled securely through Discord.</p>
         <div className="hero-search"><Ic n="search" /><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /><button className="btn btn-pri" onClick={() => document.getElementById('allHead').scrollIntoView({ behavior: 'smooth' })}>Search</button></div>
         <div className="trust">
-          {[['$3.00', 'Robux / 1K'], ['48,210', 'Orders'], ['4.9★', 'Rating'], ['22,940', 'Members']].map(([n, l]) => <div className="t" key={l}><div className="n">{n}</div><div className="l">{l}</div></div>)}
+          {[['$3.00', 'Robux / 1K'], ['7,316', 'Orders'], ['4.9★', 'Rating'], ['21,531', 'Members']].map(([n, l]) => <div className="t" key={l}><div className="n">{n}</div><div className="l">{l}</div></div>)}
         </div>
       </section>
 
@@ -137,10 +141,11 @@ export default function BuxApp() {
       <section className="wrap" style={{ marginTop: 46 }}>
         <div className="sec-h"><div><div className="eyebrow">★ Reviews</div><h2>Reviews</h2></div></div>
         <div className="vouches">
-          {REVIEWS.map(([n, b, buy], i) => <div className="vch" key={n}>
-            <div className="vch-top"><div className="vch-fb">{n[0].toUpperCase()}</div><div><div className="vch-name">{n}</div><div className="vch-date">{i + 1} day{i ? 's' : ''} ago</div></div><span className="stars" style={{ marginLeft: 'auto' }}>★★★★★</span></div>
-            <div className="vch-body">{b}</div><div className="vch-buy">Purchased: {buy}</div>
-          </div>)}
+          {REVIEWS.map(([n, b, pid, days, av], i) => { const p = PRODUCTS.find(x => x.id === pid); const d = new Date(Date.now() - days * 864e5); return <div className="vch" key={n}>
+            <div className="vch-top"><img className="vch-av" src={av || `https://cdn.discordapp.com/embed/avatars/${i % 6}.png`} alt="" /><div><div className="vch-name">{n}</div><div className="vch-date">{d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div></div><span className="stars" style={{ marginLeft: 'auto' }}>★★★★★</span></div>
+            <div className="vch-body">{b}</div>
+            <div className="vch-buy" style={{ display: 'flex', alignItems: 'center', gap: 7 }}><img src={`/icons/${pid}.png`} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} />Purchased: {p?.name}</div>
+          </div> })}
         </div>
         <div className="dc-cta">
           <div className="dc-cta-l">
@@ -157,7 +162,7 @@ export default function BuxApp() {
         <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/saint-logo.png" alt="Saint Services" /><span>Saint <span className="grad">Services</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
         <div className="foot-col"><h4>Shop</h4>{[['Robux', 'robux'], ['Limiteds', 'limiteds'], ['V-Bucks', 'vbucks'], ['Game Items', 'game-items'], ['Roblox Accounts', 'roblox-accounts'], ['Fortnite Accounts', 'fortnite-accounts'], ['Toy Codes', 'toy-codes']].map(([x, r]) => <a key={x} href="#" onClick={() => go('p:' + r)}>{x}</a>)}</div>
-        <div className="foot-col"><h4>Help</h4>{[['Guides', 'guides'], ['Verified Badge', 'guide:verified-badge'], ['FAQ', 'guide:faq'], ['Terms of Service', 'guide:tos'], ['Privacy Policy', 'guide:privacy'], ['Buy Robux on Discord', 'discord']].map(([x, r]) => <a key={x} href="#" onClick={() => go(r)}>{x}</a>)}<a href={INVITE} target="_blank" rel="noopener">Discord</a></div>
+        <div className="foot-col"><h4>Help</h4>{[['Guides', 'guides'], ['Verified Badge', 'guide:verified-badge'], ['FAQ', 'guide:faq'], ['Terms of Service', 'guide:tos'], ['Privacy Policy', 'guide:privacy'], ['Buy Robux on Discord', 'discord'], ['Sell to us', 'sell']].map(([x, r]) => <a key={x} href="#" onClick={() => go(r)}>{x}</a>)}<a href={INVITE} target="_blank" rel="noopener">Discord</a></div>
         <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{PAY.map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
       <div className="foot-bottom"><span>© {new Date().getFullYear()} Saint Services. All rights reserved.</span><span>Not affiliated with Roblox or Epic Games.</span></div>
