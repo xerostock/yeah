@@ -104,3 +104,58 @@ export default function OptionPage({ p, onAdd, onBack }) {
     </div>
   </div>
 }
+
+const PLUS_TIERS = [500, 1000, 2000]
+const PLUS_METHODS = [
+  { id: 'account', name: 'Loaded Roblox Plus Account', note: 'Ready account with Roblox Plus and the Robux already on it', prices: [5.99, 10.99, 19.99] },
+  { id: 'own', name: 'On your own account', note: 'Send a request - we activate Roblox Plus on your account', prices: [3.99, 7.49, 14.99] },
+  { id: 'giftcard', name: 'Roblox Plus Giftcard', note: 'Giftcard code you redeem yourself', prices: [4.49, 8.49, 16.99] },
+]
+export const plusFrom = Math.min(...PLUS_METHODS.flatMap(m => m.prices))
+
+export function RobloxPlusPage({ p, onAdd, onBack }) {
+  const [tier, setTier] = useState(0)
+  const [method, setMethod] = useState('account')
+  const [user, setUser] = useState('')
+  const m = PLUS_METHODS.find(x => x.id === method)
+  const price = m.prices[tier]
+  const need = method === 'own' && !user.trim()
+  const add = () => !need && onAdd({ ...p, name: `Roblox Plus ${PLUS_TIERS[tier].toLocaleString()} (${m.name}${method === 'own' ? ' - ' + user.trim() : ''})`, price })
+  return <div className="wrap">
+    <div className="crumbs"><a href="#" onClick={onBack}>Shop</a> › <span>{p.name}</span></div>
+    <div className="pdp">
+      <div className="pdp-media">
+        <div className="pdp-hero"><img src="/icons/roblox.png" alt="Roblox Plus" /></div>
+        <div className="pdp-assur">
+          <div className="a"><Ic d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />Instant delivery</div>
+          <div className="a"><Ic d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />Secure via Discord</div>
+          <div className="a"><Ic d="M20 6L9 17l-5-5" />Fair prices</div>
+          <div className="a"><Ic d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />24/7 support</div>
+        </div>
+      </div>
+      <div>
+        <div className="pdp-cat">Roblox · Membership</div>
+        <h1 className="pdp-name"><img className="pdp-name-ic" src="/icons/roblox.png" alt="" />Roblox Plus</h1>
+        <div className="pdp-rate"><span className="stars">★★★★★</span><b>4.90</b> · <span className="badge ok">In Stock</span></div>
+        <div className="pdp-price">${price.toFixed(2)}</div>
+        <div className="cfg">
+          <div>
+            <label className="cfg-l">Choose tier</label>
+            <div className="seg">{PLUS_TIERS.map((t, i) => <button key={t} className={'seg-btn' + (tier === i ? ' on' : '')} onClick={() => setTier(i)}>{t.toLocaleString()} Robux / mo</button>)}</div>
+          </div>
+          <div>
+            <label className="cfg-l">How do you want it?</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{PLUS_METHODS.map(x => <button key={x.id} className={'lim-item' + (method === x.id ? '' : '')} style={{ textAlign: 'left', fontFamily: 'inherit', color: 'var(--txt)', borderColor: method === x.id ? 'var(--accent)' : undefined }} onClick={() => setMethod(x.id)}>
+              <div><div className="li-n">{x.name}</div><div className="mut" style={{ fontSize: '.78rem' }}>{x.note}</div></div><span className="li-p">${x.prices[tier].toFixed(2)}</span>
+            </button>)}</div>
+          </div>
+          {method === 'own' && <div><label className="cfg-l">Your Roblox username *</label><input type="text" placeholder="Roblox username" value={user} onChange={e => setUser(e.target.value)} /><div className="amt-hint">We'll contact you in your Discord ticket to activate it.</div></div>}
+        </div>
+        <div className="pdp-actions">
+          <button className="btn btn-pri" disabled={need} onClick={add}>{method === 'own' ? 'Send request' : 'Add to Cart'}</button>
+          <button className="btn" disabled={need} onClick={add}>Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

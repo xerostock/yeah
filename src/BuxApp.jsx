@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './bux.css'
 import ProductPage, { CONFIG } from './ProductPage.jsx'
-import OptionPage, { OPTS, fromPrice } from './OptionPage.jsx'
+import OptionPage, { OPTS, fromPrice, RobloxPlusPage, plusFrom } from './OptionPage.jsx'
 import SellPage from './SellPage.jsx'
 import { GuidesPage, GuidePage, DiscordPage, CartPage, CheckoutPage, INVITE, PAY } from './Pages.jsx'
 
@@ -22,6 +22,7 @@ const PRODUCTS = [
   { id: 'limiteds', name: 'Limiteds', game: 'roblox', cat: 'Items', price: 1.5, feat: true, logo: ['#22c55e', 'L'] },
   { id: 'game-items', name: 'Game Items', game: 'roblox', cat: 'Items', price: 0.5, feat: true, logo: ['#ff7a18', 'MM2'] },
   { id: 'roblox-accounts', name: 'Roblox Accounts', game: 'roblox', cat: 'Accounts', price: 4.99, logo: ['#334155', 'RA'] },
+  { id: 'roblox-plus', name: 'Roblox Plus', game: 'roblox', cat: 'Accounts', price: plusFrom, feat: true, img: '/icons/roblox.png' },
   { id: 'toy-codes', name: 'Toy Codes', game: 'roblox', cat: 'Items', price: 2.99, logo: ['#a855f7', 'TC'] },
   { id: 'vbucks', name: 'V-Bucks', game: 'fortnite', cat: 'Currency', price: 14.99, feat: true, logo: ['#3b82f6', 'V'] },
   { id: 'fortnite-accounts', name: 'Fortnite Accounts', game: 'fortnite', cat: 'Accounts', price: 9.99, logo: ['#6366f1', 'FA'] },
@@ -42,7 +43,7 @@ const money = n => '$' + n.toFixed(2)
 
 function Card({ p, onAdd }) {
   return <div className="pcard" onClick={() => onAdd(p)}>
-    <div className="pcard-img">{p.feat && <span className="pcard-feat">HOT</span>}<img src={`/icons/${p.id}.png`} alt={p.name} /></div>
+    <div className="pcard-img">{p.feat && <span className="pcard-feat">HOT</span>}<img src={p.img || `/icons/${p.id}.png`} alt={p.name} /></div>
     <div className="pcard-body">
       <div className="pcard-cat">{GAMES[p.game]} · {p.cat}</div>
       <div className="pcard-name">{p.name}</div>
@@ -75,7 +76,7 @@ export default function BuxApp() {
   const [page, setPage] = useState(null)
   const [user, setUser] = useState(null)
   const go = r => { setDrawer(false); setPage(typeof r === 'string' && r.startsWith('p:') ? PRODUCTS.find(p => p.id === r.slice(2)) : r); window.scrollTo(0, 0) }
-  const open = p => { if (CONFIG[p.id] || OPTS[p.id]) { setPage(p); window.scrollTo(0, 0) } else add(p) }
+  const open = p => { if (CONFIG[p.id] || OPTS[p.id] || p.id === 'roblox-plus') { setPage(p); window.scrollTo(0, 0) } else add(p) }
   const add = p => { setCart(c => [...c, p]); setDrawer(true) }
   const total = cart.reduce((s, p) => s + p.price, 0)
 
@@ -97,10 +98,10 @@ export default function BuxApp() {
       </div>
     </div></header>
 
-    <main>{page === 'sell' ? <SellPage go={go} /> : page === 'guides' ? <GuidesPage go={go} /> : typeof page === 'string' && page.startsWith('guide:') ? <GuidePage key={page} slug={page.slice(6)} go={go} /> : page === 'discord' ? <DiscordPage go={go} /> : page === 'cart' ? <CartPage cart={cart} setCart={setCart} go={go} /> : page === 'checkout' ? <CheckoutPage cart={cart} setCart={setCart} go={go} user={user} setUser={setUser} /> : page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
+    <main>{page === 'sell' ? <SellPage go={go} /> : page === 'guides' ? <GuidesPage go={go} /> : typeof page === 'string' && page.startsWith('guide:') ? <GuidePage key={page} slug={page.slice(6)} go={go} /> : page === 'discord' ? <DiscordPage go={go} /> : page === 'cart' ? <CartPage cart={cart} setCart={setCart} go={go} /> : page === 'checkout' ? <CheckoutPage cart={cart} setCart={setCart} go={go} user={user} setUser={setUser} /> : page?.id === 'roblox-plus' ? <RobloxPlusPage p={page} onAdd={add} onBack={() => setPage(null)} /> : page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
       <section className="hero wrap">
         <div className="statuspill"><span className="dot"></span>Online <span className="eta">· ~5 min delivery</span></div>
-        <h1><span className="grad">The Premium Game Marketplace</span></h1>
+        <h1><span className="grad">Saint Services</span><sup style={{ fontSize: '.4em', color: 'var(--accent2)', marginLeft: 4 }}>™</sup></h1>
         <p className="sub">Robux, Limiteds, accounts, V-Bucks &amp; more - the best rates, instant delivery, fulfilled securely through Discord.</p>
         <div className="hero-search"><Ic n="search" /><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /><button className="btn btn-pri" onClick={() => document.getElementById('allHead').scrollIntoView({ behavior: 'smooth' })}>Search</button></div>
         <div className="trust">
@@ -144,7 +145,7 @@ export default function BuxApp() {
           {REVIEWS.map(([n, b, pid, days, av], i) => { const p = PRODUCTS.find(x => x.id === pid); const d = new Date(Date.now() - days * 864e5); return <div className="vch" key={n}>
             <div className="vch-top"><img className="vch-av" src={av || `https://cdn.discordapp.com/embed/avatars/${i % 6}.png`} alt="" /><div><div className="vch-name">{n}</div><div className="vch-date">{d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div></div><span className="stars" style={{ marginLeft: 'auto' }}>★★★★★</span></div>
             <div className="vch-body">{b}</div>
-            <div className="vch-buy" style={{ display: 'flex', alignItems: 'center', gap: 7 }}><img src={`/icons/${pid}.png`} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} />Purchased: {p?.name}</div>
+            <div className="vch-buy" style={{ display: 'flex', alignItems: 'center', gap: 7 }}><img src={PRODUCTS.find(x => x.id === pid)?.img || `/icons/${pid}.png`} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} />Purchased: {p?.name}</div>
           </div> })}
         </div>
         <div className="dc-cta">
@@ -161,7 +162,7 @@ export default function BuxApp() {
       <div className="foot-grid">
         <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/saint-logo.png" alt="Saint Services" /><span>Saint <span className="grad">Services</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
-        <div className="foot-col"><h4>Shop</h4>{[['Robux', 'robux'], ['Limiteds', 'limiteds'], ['V-Bucks', 'vbucks'], ['Game Items', 'game-items'], ['Roblox Accounts', 'roblox-accounts'], ['Fortnite Accounts', 'fortnite-accounts'], ['Toy Codes', 'toy-codes']].map(([x, r]) => <a key={x} href="#" onClick={() => go('p:' + r)}>{x}</a>)}</div>
+        <div className="foot-col"><h4>Shop</h4>{[['Robux', 'robux'], ['Limiteds', 'limiteds'], ['V-Bucks', 'vbucks'], ['Game Items', 'game-items'], ['Roblox Accounts', 'roblox-accounts'], ['Fortnite Accounts', 'fortnite-accounts'], ['Toy Codes', 'toy-codes'], ['Roblox Plus', 'roblox-plus']].map(([x, r]) => <a key={x} href="#" onClick={() => go('p:' + r)}>{x}</a>)}</div>
         <div className="foot-col"><h4>Help</h4>{[['Guides', 'guides'], ['Verified Badge', 'guide:verified-badge'], ['FAQ', 'guide:faq'], ['Terms of Service', 'guide:tos'], ['Privacy Policy', 'guide:privacy'], ['Buy Robux on Discord', 'discord'], ['Sell to us', 'sell']].map(([x, r]) => <a key={x} href="#" onClick={() => go(r)}>{x}</a>)}<a href={INVITE} target="_blank" rel="noopener">Discord</a></div>
         <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{PAY.map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
