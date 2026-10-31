@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './bux.css'
 import ProductPage, { CONFIG } from './ProductPage.jsx'
 import OptionPage, { OPTS, fromPrice } from './OptionPage.jsx'
+import { GuidesPage, GuidePage, DiscordPage, CartPage, CheckoutPage, INVITE, PAY } from './Pages.jsx'
 
 const I = {
   search: <><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></>,
@@ -69,6 +70,8 @@ export default function BuxApp() {
   }, [game, cat, sort, q])
   const feat = PRODUCTS.filter(p => p.feat)
   const [page, setPage] = useState(null)
+  const [user, setUser] = useState(null)
+  const go = r => { setDrawer(false); setPage(typeof r === 'string' && r.startsWith('p:') ? PRODUCTS.find(p => p.id === r.slice(2)) : r); window.scrollTo(0, 0) }
   const open = p => { if (CONFIG[p.id] || OPTS[p.id]) { setPage(p); window.scrollTo(0, 0) } else add(p) }
   const add = p => { setCart(c => [...c, p]); setDrawer(true) }
   const total = cart.reduce((s, p) => s + p.price, 0)
@@ -79,17 +82,18 @@ export default function BuxApp() {
       <nav className="nav-links">
         <a className={!game ? 'on' : ''} href="#" onClick={() => { setGame(null); setPage(null) }}>Shop</a>
         {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => { setGame(k); setPage(null) }}>{v}</a>)}
-        <a href="#">Guides</a>
+        <a className={typeof page === 'string' && page.startsWith('guide') ? 'on' : ''} href="#" onClick={() => go('guides')}>Guides</a>
       </nav>
       <div className="nav-search"><span className="ic"><Ic n="search" s={18} /></span><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /></div>
       <div className="nav-right">
         <button className="iconbtn lang-btn">EN</button>
         <button className="iconbtn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}><Ic n={theme === 'dark' ? 'sun' : 'moon'} /></button>
+        <a className="iconbtn" href={INVITE} target="_blank" rel="noopener" title="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.6 1.3a18.3 18.3 0 0 0-5.5 0L8.7 3a19.7 19.7 0 0 0-4.9 1.4C.6 9.1-.3 13.6.1 18.1a19.9 19.9 0 0 0 6 3l1.3-2.1a13 13 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12.2 0l.5.4a13 13 0 0 1-2 1l1.3 2.1a19.8 19.8 0 0 0 6-3c.5-5.2-.9-9.7-3.6-13.7zM8 15.3c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.5 8 10.5s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg></a>
         <button className="iconbtn" onClick={() => setDrawer(true)}><Ic n="cart" />{cart.length > 0 && <span className="cart-badge">{cart.length}</span>}</button>
       </div>
     </div></header>
 
-    <main>{page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
+    <main>{page === 'guides' ? <GuidesPage go={go} /> : typeof page === 'string' && page.startsWith('guide:') ? <GuidePage key={page} slug={page.slice(6)} go={go} /> : page === 'discord' ? <DiscordPage go={go} /> : page === 'cart' ? <CartPage cart={cart} setCart={setCart} go={go} /> : page === 'checkout' ? <CheckoutPage cart={cart} setCart={setCart} go={go} user={user} setUser={setUser} /> : page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
       <section className="hero wrap">
         <div className="statuspill"><span className="dot"></span>Online <span className="eta">· ~5 min delivery</span></div>
         <h1><span className="grad">The Premium Game Marketplace</span></h1>
@@ -142,7 +146,7 @@ export default function BuxApp() {
           <div className="dc-cta-l">
             <h2>Join Our Discord Server</h2>
             <p>Connect with our team, join the community and get exclusive deals, giveaways and updates. Your presence matters - join the excitement today!</p>
-            <a className="dc-cta-btn" href="#">Join</a>
+            <a className="dc-cta-btn" href={INVITE} target="_blank" rel="noopener">Join</a>
           </div>
         </div>
       </section>
@@ -152,18 +156,18 @@ export default function BuxApp() {
       <div className="foot-grid">
         <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/saint-logo.png" alt="Saint Services" /><span>Saint <span className="grad">Services</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
-        <div className="foot-col"><h4>Shop</h4>{['Robux', 'Limiteds', 'V-Bucks', 'Game Items'].map(x => <a key={x} href="#">{x}</a>)}</div>
-        <div className="foot-col"><h4>Help</h4>{['Guides', 'Verified Badge', 'FAQ', 'Terms of Service', 'Privacy Policy', 'Discord'].map(x => <a key={x} href="#">{x}</a>)}</div>
-        <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{['card', 'paypal', 'applepay', 'googlepay', 'cashapp', 'venmo', 'zelle', 'wise', 'paysafecard', 'btc', 'eth', 'ltc', 'sol', 'usdt'].map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
+        <div className="foot-col"><h4>Shop</h4>{[['Robux', 'robux'], ['Limiteds', 'limiteds'], ['V-Bucks', 'vbucks'], ['Game Items', 'game-items'], ['Roblox Accounts', 'roblox-accounts'], ['Fortnite Accounts', 'fortnite-accounts'], ['Toy Codes', 'toy-codes']].map(([x, r]) => <a key={x} href="#" onClick={() => go('p:' + r)}>{x}</a>)}</div>
+        <div className="foot-col"><h4>Help</h4>{[['Guides', 'guides'], ['Verified Badge', 'guide:verified-badge'], ['FAQ', 'guide:faq'], ['Terms of Service', 'guide:tos'], ['Privacy Policy', 'guide:privacy'], ['Buy Robux on Discord', 'discord']].map(([x, r]) => <a key={x} href="#" onClick={() => go(r)}>{x}</a>)}<a href={INVITE} target="_blank" rel="noopener">Discord</a></div>
+        <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{PAY.map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
-      <div className="foot-bottom"><span>© {new Date().getFullYear()} Saint Services. All rights reserved.</span><span>Not affiliated with Roblox, Epic Games or Riot Games.</span></div>
+      <div className="foot-bottom"><span>© {new Date().getFullYear()} Saint Services. All rights reserved.</span><span>Not affiliated with Roblox or Epic Games.</span></div>
     </div></footer>
 
     <div className={'drawer-bg' + (drawer ? ' on' : '')} onClick={() => setDrawer(false)} />
     <aside className={'drawer' + (drawer ? ' on' : '')}>
       <div className="drawer-h"><h3>Your Cart</h3><button className="iconbtn" onClick={() => setDrawer(false)}><Ic n="x" /></button></div>
       <div className="drawer-items">{cart.length ? cart.map((p, i) => <div className="ci" key={i}><img src={p.img || `/icons/${p.id}.png`} alt="" /><div><div className="ci-n">{p.name}</div><div className="ci-p">{money(p.price)}</div></div><div className="ci-right"><span className="ci-rm" onClick={() => setCart(c => c.filter((_, j) => j !== i))}>Remove</span></div></div>) : <div className="empty">Your cart is empty</div>}</div>
-      {cart.length > 0 && <div className="drawer-foot"><div className="drawer-sub"><span>Subtotal</span><b>{money(total)}</b></div><button className="btn btn-pri btn-lg">Checkout</button></div>}
+      {cart.length > 0 && <div className="drawer-foot"><div className="drawer-sub"><span>Subtotal</span><b>{money(total)}</b></div><button className="btn btn-pri btn-lg" onClick={() => go('checkout')}>Checkout</button><button className="btn" onClick={() => go('cart')}>View Cart</button></div>}
     </aside>
 
     <button className={'chat-fab' + (chat ? ' hide' : '')} onClick={() => setChat(true)}><Ic n="chat" s={26} /></button>
