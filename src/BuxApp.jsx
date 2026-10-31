@@ -57,7 +57,6 @@ export default function BuxApp() {
   const [cart, setCart] = useState([])
   const [drawer, setDrawer] = useState(false)
   const [chat, setChat] = useState(false)
-  const [hw, setHw] = useState(true)
 
   useEffect(() => { document.documentElement.setAttribute('data-theme', theme) }, [theme])
 
@@ -74,7 +73,7 @@ export default function BuxApp() {
 
   return <>
     <header id="nav"><div className="wrap">
-      <a className="logo" href="#" onClick={() => setGame(null)}><img src="/logo.png" alt="Bux Stock" /><span>Bux <span className="grad">Stock</span></span></a>
+      <a className="logo" href="#" onClick={() => setGame(null)}><span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800 }}>S</span><span>Saint <span className="grad">Services</span></span></a>
       <nav className="nav-links">
         <a className={!game ? 'on' : ''} href="#" onClick={() => setGame(null)}>Shop</a>
         {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => setGame(k)}>{v}</a>)}
@@ -149,13 +148,13 @@ export default function BuxApp() {
 
     <footer id="foot"><div className="wrap">
       <div className="foot-grid">
-        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/logo.png" style={{ width: 28, height: 28, borderRadius: 8 }} alt="" /><span>Bux <span className="grad">Stock</span></span></a>
+        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800 }}>S</span><span>Saint <span className="grad">Services</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
         <div className="foot-col"><h4>Shop</h4>{['Robux', 'Limiteds', 'V-Bucks', 'Valorant Points', 'Game Items'].map(x => <a key={x} href="#">{x}</a>)}</div>
         <div className="foot-col"><h4>Help</h4>{['Guides', 'Verified Badge', 'FAQ', 'Terms of Service', 'Privacy Policy', 'Discord'].map(x => <a key={x} href="#">{x}</a>)}</div>
         <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{['card', 'paypal', 'applepay', 'googlepay', 'cashapp', 'venmo', 'zelle', 'wise', 'paysafecard', 'btc', 'eth', 'ltc', 'sol', 'usdt'].map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
-      <div className="foot-bottom"><span>© {new Date().getFullYear()} Bux Stock. All rights reserved.</span><span>Not affiliated with Roblox, Epic Games or Riot Games.</span></div>
+      <div className="foot-bottom"><span>© {new Date().getFullYear()} Saint Services. All rights reserved.</span><span>Not affiliated with Roblox, Epic Games or Riot Games.</span></div>
     </div></footer>
 
     <div className={'drawer-bg' + (drawer ? ' on' : '')} onClick={() => setDrawer(false)} />
@@ -165,22 +164,9 @@ export default function BuxApp() {
       {cart.length > 0 && <div className="drawer-foot"><div className="drawer-sub"><span>Subtotal</span><b>{money(total)}</b></div><button className="btn btn-pri btn-lg">Checkout</button></div>}
     </aside>
 
-    <div className={'modal-bg' + (hw ? ' on' : '')} onClick={e => e.target === e.currentTarget && setHw(false)}>
-      <div className="hw-modal">
-        <button className="modal-x" onClick={() => setHw(false)}>✕</button>
-        <div className="hw-pump">🎃</div>
-        <div><span className="hw-chip">Halloween drop · limited time</span></div>
-        <h2>Spooky season is here</h2>
-        <p className="hw-sub">New <b>MM2 Halloween items</b> just landed - plus a <b>Headless deal</b> on 31K Robux. Grab them before the season's gone!</p>
-        <div className="hw-tiles"><a className="hw-tile" href="#" onClick={() => setHw(false)}><img className="t-ic" src="/icons/opt/mm2.png" alt="" /><b>MM2 Halloween Items</b><small>Ember Set, Immortal Set &amp; more</small><span className="t-go">Shop now →</span></a><a className="hw-tile" href="#" onClick={() => setHw(false)}><img className="t-ic" src="/icons/robux.png" alt="" /><b>Headless Deal</b><small>31,000 Robux - exactly what Headless Horseman costs</small><span className="t-go">Get the deal →</span></a></div>
-        <button className="btn btn-pri btn-lg hw-cta" onClick={() => setHw(false)}>🎃 Shop the Halloween drop</button>
-        <button className="hw-later" onClick={() => setHw(false)}>Maybe later</button>
-      </div>
-    </div>
-
     <button className={'chat-fab' + (chat ? ' hide' : '')} onClick={() => setChat(true)}><Ic n="chat" s={26} /></button>
     <div className={'chat-panel' + (chat ? ' on' : '')}>
-      <div className="chat-head"><div className="chat-head-l"><span className="chat-avatar"><Ic n="chat" /></span><div><div className="chat-title">Bux Support</div><div className="chat-status"><span className="chat-dot"></span>Typically replies in minutes</div></div></div>
+      <div className="chat-head"><div className="chat-head-l"><span className="chat-avatar"><Ic n="chat" /></span><div><div className="chat-title">Saint Support</div><div className="chat-status"><span className="chat-dot"></span>Typically replies in minutes</div></div></div>
         <button className="chat-icbtn" onClick={() => setChat(false)}><Ic n="x" /></button></div>
       <div className="chat-msgs"><div className="chat-msg bot">Hi! 👋 How can I help you today?</div></div>
       <form className="chat-input" onSubmit={e => e.preventDefault()}><input placeholder="Ask about products, delivery, payments…" /><button className="chat-send" type="submit"><Ic n="chat" /></button></form>
