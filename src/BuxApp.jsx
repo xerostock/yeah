@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './bux.css'
+import ProductPage, { CONFIG } from './ProductPage.jsx'
 
 const I = {
   search: <><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></>,
@@ -14,25 +15,22 @@ const Ic = ({ n, s = 20 }) => <svg className="ic" width={s} height={s} viewBox="
 const Logo = ({ bg = '#E11D2A', t = 'B' }) => <div style={{ width: 96, height: 96, borderRadius: 22, background: bg, display: 'grid', placeItems: 'center', color: '#fff', fontFamily: 'Space Grotesk', fontWeight: 800, fontSize: 40, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>{t}</div>
 
 const PRODUCTS = [
-  { id: 'robux', name: 'Robux', game: 'roblox', cat: 'Currency', price: 3.0, unit: '/ 1K', feat: true, logo: ['#E11D2A', 'R$'] },
+  { id: 'robux', name: 'Robux', game: 'roblox', cat: 'Currency', price: 15.0, unit: '/ 1K', feat: true, logo: ['#E11D2A', 'R$'] },
   { id: 'limiteds', name: 'Limiteds', game: 'roblox', cat: 'Items', price: 1.5, feat: true, logo: ['#22c55e', 'L'] },
   { id: 'game-items', name: 'Game Items', game: 'roblox', cat: 'Items', price: 0.5, feat: true, logo: ['#ff7a18', 'MM2'] },
   { id: 'roblox-accounts', name: 'Roblox Accounts', game: 'roblox', cat: 'Accounts', price: 4.99, logo: ['#334155', 'RA'] },
   { id: 'toy-codes', name: 'Toy Codes', game: 'roblox', cat: 'Items', price: 2.99, logo: ['#a855f7', 'TC'] },
-  { id: 'vbucks', name: 'V-Bucks', game: 'fortnite', cat: 'Currency', price: 4.49, feat: true, logo: ['#3b82f6', 'V'] },
+  { id: 'vbucks', name: 'V-Bucks', game: 'fortnite', cat: 'Currency', price: 14.99, feat: true, logo: ['#3b82f6', 'V'] },
   { id: 'fortnite-accounts', name: 'Fortnite Accounts', game: 'fortnite', cat: 'Accounts', price: 9.99, logo: ['#6366f1', 'FA'] },
-  { id: 'valorant-points', name: 'Valorant Points', game: 'valorant', cat: 'Currency', price: 3.99, feat: true, logo: ['#ff4655', 'VP'] },
-  { id: 'valorant-accounts', name: 'Valorant Accounts', game: 'valorant', cat: 'Accounts', price: 7.99, logo: ['#be123c', 'VA'] },
-  { id: 'riot-buddy', name: 'Riot Buddy', game: 'valorant', cat: 'Items', price: 1.99, logo: ['#f43f5e', 'RB'] },
 ]
-const GAMES = { roblox: 'Roblox', fortnite: 'Fortnite', valorant: 'Valorant' }
+const GAMES = { roblox: 'Roblox', fortnite: 'Fortnite' }
 const REVIEWS = [
   ['jxke', 'Got my 10k robux in like 3 minutes, legit.', 'Robux'],
   ['luna.rbx', 'Best rates I have found, staff was super helpful in the ticket.', 'Limiteds'],
   ['tyler_ftn', 'Smooth V-Bucks purchase, will buy again.', 'V-Bucks'],
   ['mxrk', 'Fast delivery on my MM2 set, 10/10.', 'Game Items'],
   ['zayyy', 'Trusted. 5th order now, never had an issue.', 'Robux'],
-  ['kira', 'Valorant points arrived instantly. Thanks!', 'Valorant Points'],
+  ['kira', 'V-Bucks arrived instantly. Thanks!', 'V-Bucks'],
 ]
 const money = n => '$' + n.toFixed(2)
 
@@ -68,15 +66,17 @@ export default function BuxApp() {
     return l
   }, [game, cat, sort, q])
   const feat = PRODUCTS.filter(p => p.feat)
+  const [page, setPage] = useState(null)
+  const open = p => { if (CONFIG[p.id]) { setPage(p); window.scrollTo(0, 0) } else add(p) }
   const add = p => { setCart(c => [...c, p]); setDrawer(true) }
   const total = cart.reduce((s, p) => s + p.price, 0)
 
   return <>
     <header id="nav"><div className="wrap">
-      <a className="logo" href="#" onClick={() => setGame(null)}><span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800 }}>S</span><span>Saint <span className="grad">Services</span></span></a>
+      <a className="logo" href="#" onClick={() => { setGame(null); setPage(null) }}><img src="/saint-logo.png" alt="Saint Services" /><span>Saint <span className="grad">Services</span></span></a>
       <nav className="nav-links">
-        <a className={!game ? 'on' : ''} href="#" onClick={() => setGame(null)}>Shop</a>
-        {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => setGame(k)}>{v}</a>)}
+        <a className={!game ? 'on' : ''} href="#" onClick={() => { setGame(null); setPage(null) }}>Shop</a>
+        {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => { setGame(k); setPage(null) }}>{v}</a>)}
         <a href="#">Guides</a>
       </nav>
       <div className="nav-search"><span className="ic"><Ic n="search" s={18} /></span><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /></div>
@@ -87,11 +87,11 @@ export default function BuxApp() {
       </div>
     </div></header>
 
-    <main>
+    <main>{page ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <>
       <section className="hero wrap">
         <div className="statuspill"><span className="dot"></span>Online <span className="eta">· ~5 min delivery</span></div>
         <h1><span className="grad">The Premium Game Marketplace</span></h1>
-        <p className="sub">Robux, Limiteds, accounts, V-Bucks &amp; Valorant - the best rates, instant delivery, fulfilled securely through Discord.</p>
+        <p className="sub">Robux, Limiteds, accounts, V-Bucks &amp; more - the best rates, instant delivery, fulfilled securely through Discord.</p>
         <div className="hero-search"><Ic n="search" /><input placeholder="Search products…" value={q} onChange={e => setQ(e.target.value)} /><button className="btn btn-pri" onClick={() => document.getElementById('allHead').scrollIntoView({ behavior: 'smooth' })}>Search</button></div>
         <div className="trust">
           {[['$3.00', 'Robux / 1K'], ['48,210', 'Orders'], ['4.9★', 'Rating'], ['22,940', 'Members']].map(([n, l]) => <div className="t" key={l}><div className="n">{n}</div><div className="l">{l}</div></div>)}
@@ -114,10 +114,10 @@ export default function BuxApp() {
         </div>
 
         <div className="sec-h"><div><div className="eyebrow">★ Bestsellers</div><h2>Featured products</h2></div></div>
-        <div className="frow"><div className="marquee">{[...feat, ...feat, ...feat, ...feat].map((p, i) => <Card key={i} p={p} onAdd={add} />)}</div></div>
+        <div className="frow"><div className="marquee">{[...feat, ...feat, ...feat, ...feat].map((p, i) => <Card key={i} p={p} onAdd={open} />)}</div></div>
 
         <div className="sec-h" id="allHead"><h2>All products</h2><span className="mut">{list.length} products</span></div>
-        <div className="grid">{list.length ? list.map(p => <Card key={p.id} p={p} onAdd={add} />) : <div className="empty" style={{ gridColumn: '1/-1' }}>No products found.</div>}</div>
+        <div className="grid">{list.length ? list.map(p => <Card key={p.id} p={p} onAdd={open} />) : <div className="empty" style={{ gridColumn: '1/-1' }}>No products found.</div>}</div>
       </div>
 
       <section className="wrap" style={{ marginTop: 46 }}>
@@ -144,13 +144,13 @@ export default function BuxApp() {
           </div>
         </div>
       </section>
-    </main>
+    </>}</main>
 
     <footer id="foot"><div className="wrap">
       <div className="foot-grid">
-        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800 }}>S</span><span>Saint <span className="grad">Services</span></span></a>
+        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/saint-logo.png" alt="Saint Services" /><span>Saint <span className="grad">Services</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
-        <div className="foot-col"><h4>Shop</h4>{['Robux', 'Limiteds', 'V-Bucks', 'Valorant Points', 'Game Items'].map(x => <a key={x} href="#">{x}</a>)}</div>
+        <div className="foot-col"><h4>Shop</h4>{['Robux', 'Limiteds', 'V-Bucks', 'Game Items'].map(x => <a key={x} href="#">{x}</a>)}</div>
         <div className="foot-col"><h4>Help</h4>{['Guides', 'Verified Badge', 'FAQ', 'Terms of Service', 'Privacy Policy', 'Discord'].map(x => <a key={x} href="#">{x}</a>)}</div>
         <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{['card', 'paypal', 'applepay', 'googlepay', 'cashapp', 'venmo', 'zelle', 'wise', 'paysafecard', 'btc', 'eth', 'ltc', 'sol', 'usdt'].map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
