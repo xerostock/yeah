@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Stick3D from './Stick3D.jsx'
+import BuxApp from './BuxApp.jsx'
 
 const ACCENT = '#ff1493'
 const LENGTHS = ['104cm', '101cm', '96cm', '92cm', '87cm', '82cm']
@@ -90,4 +91,4 @@ function App() {
   </div>
 }
 
-createRoot(document.getElementById('root')).render(<App />)
+createRoot(document.getElementById('root')).render(<BuxApp />)
