@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './bux.css'
 import ProductPage, { CONFIG } from './ProductPage.jsx'
+import OptionPage, { OPTS, fromPrice } from './OptionPage.jsx'
 
 const I = {
   search: <><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></>,
@@ -23,6 +24,7 @@ const PRODUCTS = [
   { id: 'vbucks', name: 'V-Bucks', game: 'fortnite', cat: 'Currency', price: 14.99, feat: true, logo: ['#3b82f6', 'V'] },
   { id: 'fortnite-accounts', name: 'Fortnite Accounts', game: 'fortnite', cat: 'Accounts', price: 9.99, logo: ['#6366f1', 'FA'] },
 ]
+PRODUCTS.forEach(p => { if (OPTS[p.id]) p.price = fromPrice(p.id) })
 const GAMES = { roblox: 'Roblox', fortnite: 'Fortnite' }
 const REVIEWS = [
   ['jxke', 'Got my 10k robux in like 3 minutes, legit.', 'Robux'],
@@ -67,7 +69,7 @@ export default function BuxApp() {
   }, [game, cat, sort, q])
   const feat = PRODUCTS.filter(p => p.feat)
   const [page, setPage] = useState(null)
-  const open = p => { if (CONFIG[p.id]) { setPage(p); window.scrollTo(0, 0) } else add(p) }
+  const open = p => { if (CONFIG[p.id] || OPTS[p.id]) { setPage(p); window.scrollTo(0, 0) } else add(p) }
   const add = p => { setCart(c => [...c, p]); setDrawer(true) }
   const total = cart.reduce((s, p) => s + p.price, 0)
 
@@ -87,7 +89,7 @@ export default function BuxApp() {
       </div>
     </div></header>
 
-    <main>{page ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <>
+    <main>{page ? (CONFIG[page.id] ? <ProductPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} /> : <OptionPage key={page.id} p={page} onAdd={add} onBack={() => setPage(null)} />) : <>
       <section className="hero wrap">
         <div className="statuspill"><span className="dot"></span>Online <span className="eta">· ~5 min delivery</span></div>
         <h1><span className="grad">The Premium Game Marketplace</span></h1>
@@ -160,7 +162,7 @@ export default function BuxApp() {
     <div className={'drawer-bg' + (drawer ? ' on' : '')} onClick={() => setDrawer(false)} />
     <aside className={'drawer' + (drawer ? ' on' : '')}>
       <div className="drawer-h"><h3>Your Cart</h3><button className="iconbtn" onClick={() => setDrawer(false)}><Ic n="x" /></button></div>
-      <div className="drawer-items">{cart.length ? cart.map((p, i) => <div className="ci" key={i}><img src={`/icons/${p.id}.png`} alt="" /><div><div className="ci-n">{p.name}</div><div className="ci-p">{money(p.price)}</div></div><div className="ci-right"><span className="ci-rm" onClick={() => setCart(c => c.filter((_, j) => j !== i))}>Remove</span></div></div>) : <div className="empty">Your cart is empty</div>}</div>
+      <div className="drawer-items">{cart.length ? cart.map((p, i) => <div className="ci" key={i}><img src={p.img || `/icons/${p.id}.png`} alt="" /><div><div className="ci-n">{p.name}</div><div className="ci-p">{money(p.price)}</div></div><div className="ci-right"><span className="ci-rm" onClick={() => setCart(c => c.filter((_, j) => j !== i))}>Remove</span></div></div>) : <div className="empty">Your cart is empty</div>}</div>
       {cart.length > 0 && <div className="drawer-foot"><div className="drawer-sub"><span>Subtotal</span><b>{money(total)}</b></div><button className="btn btn-pri btn-lg">Checkout</button></div>}
     </aside>
 
