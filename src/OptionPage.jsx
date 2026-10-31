@@ -47,7 +47,6 @@ export default function OptionPage({ p, onAdd, onBack }) {
   const [sel, setSel] = useState(c.kind === 'lim' ? null : opts[0].id)
   const [qty, setQty] = useState(1)
   const [q, setQ] = useState('')
-  const [user, setUser] = useState('')
   const cur = opts.find(o => o.id === sel)
   const max = cur?.stock ?? 99
   const price = cur ? cur.price * qty : 0
@@ -108,7 +107,6 @@ export default function OptionPage({ p, onAdd, onBack }) {
 const PLUS_TIERS = [500, 1000, 2000]
 const PLUS_METHODS = [
   { id: 'account', name: 'Loaded Roblox Plus Account', note: 'Ready account with Roblox Plus and the Robux already on it', prices: [5.99, 10.99, 19.99] },
-  { id: 'own', name: 'On your own account', note: 'Send a request - we activate Roblox Plus on your account', prices: [3.99, 7.49, 14.99] },
   { id: 'giftcard', name: 'Roblox Plus Giftcard', note: 'Giftcard code you redeem yourself', prices: [4.49, 8.49, 16.99] },
 ]
 export const plusFrom = Math.min(...PLUS_METHODS.flatMap(m => m.prices))
@@ -116,11 +114,9 @@ export const plusFrom = Math.min(...PLUS_METHODS.flatMap(m => m.prices))
 export function RobloxPlusPage({ p, onAdd, onBack }) {
   const [tier, setTier] = useState(0)
   const [method, setMethod] = useState('account')
-  const [user, setUser] = useState('')
   const m = PLUS_METHODS.find(x => x.id === method)
   const price = m.prices[tier]
-  const need = method === 'own' && !user.trim()
-  const add = () => !need && onAdd({ ...p, name: `Roblox Plus ${PLUS_TIERS[tier].toLocaleString()} (${m.name}${method === 'own' ? ' - ' + user.trim() : ''})`, price })
+  const add = () => onAdd({ ...p, name: `Roblox Plus ${PLUS_TIERS[tier].toLocaleString()} (${m.name})`, price })
   return <div className="wrap">
     <div className="crumbs"><a href="#" onClick={onBack}>Shop</a> › <span>{p.name}</span></div>
     <div className="pdp">
@@ -149,11 +145,10 @@ export function RobloxPlusPage({ p, onAdd, onBack }) {
               <div><div className="li-n">{x.name}</div><div className="mut" style={{ fontSize: '.78rem' }}>{x.note}</div></div><span className="li-p">${x.prices[tier].toFixed(2)}</span>
             </button>)}</div>
           </div>
-          {method === 'own' && <div><label className="cfg-l">Your Roblox username *</label><input type="text" placeholder="Roblox username" value={user} onChange={e => setUser(e.target.value)} /><div className="amt-hint">We'll contact you in your Discord ticket to activate it.</div></div>}
         </div>
         <div className="pdp-actions">
-          <button className="btn btn-pri" disabled={need} onClick={add}>{method === 'own' ? 'Send request' : 'Add to Cart'}</button>
-          <button className="btn" disabled={need} onClick={add}>Buy Now</button>
+          <button className="btn btn-pri" onClick={add}>Add to Cart</button>
+          <button className="btn" onClick={add}>Buy Now</button>
         </div>
       </div>
     </div>
