@@ -10,6 +10,7 @@ const I = {
   x: <path d="M18 6L6 18M6 6l12 12" />,
 }
 const Ic = ({ n, s = 20 }) => <svg className="ic" width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{I[n]}</svg>
+// eslint-disable-next-line
 const Logo = ({ bg = '#E11D2A', t = 'B' }) => <div style={{ width: 96, height: 96, borderRadius: 22, background: bg, display: 'grid', placeItems: 'center', color: '#fff', fontFamily: 'Space Grotesk', fontWeight: 800, fontSize: 40, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>{t}</div>
 
 const PRODUCTS = [
@@ -37,7 +38,7 @@ const money = n => '$' + n.toFixed(2)
 
 function Card({ p, onAdd }) {
   return <div className="pcard" onClick={() => onAdd(p)}>
-    <div className="pcard-img">{p.feat && <span className="pcard-feat">HOT</span>}<Logo bg={p.logo[0]} t={p.logo[1]} /></div>
+    <div className="pcard-img">{p.feat && <span className="pcard-feat">HOT</span>}<img src={`/icons/${p.id}.png`} alt={p.name} /></div>
     <div className="pcard-body">
       <div className="pcard-cat">{GAMES[p.game]} · {p.cat}</div>
       <div className="pcard-name">{p.name}</div>
@@ -73,7 +74,7 @@ export default function BuxApp() {
 
   return <>
     <header id="nav"><div className="wrap">
-      <a className="logo" href="#" onClick={() => setGame(null)}><span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff' }}>B</span><span>Bux <span className="grad">Stock</span></span></a>
+      <a className="logo" href="#" onClick={() => setGame(null)}><img src="/logo.png" alt="Bux Stock" /><span>Bux <span className="grad">Stock</span></span></a>
       <nav className="nav-links">
         <a className={!game ? 'on' : ''} href="#" onClick={() => setGame(null)}>Shop</a>
         {Object.entries(GAMES).map(([k, v]) => <a key={k} className={game === k ? 'on' : ''} href="#" onClick={() => setGame(k)}>{v}</a>)}
@@ -148,11 +149,11 @@ export default function BuxApp() {
 
     <footer id="foot"><div className="wrap">
       <div className="foot-grid">
-        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><span>Bux <span className="grad">Stock</span></span></a>
+        <div className="foot-col"><a className="logo" href="#" style={{ marginBottom: 12 }}><img src="/logo.png" style={{ width: 28, height: 28, borderRadius: 8 }} alt="" /><span>Bux <span className="grad">Stock</span></span></a>
           <p className="mut" style={{ fontSize: '.88rem', maxWidth: 280 }}>The premium game marketplace - best rates, instant delivery, secured through Discord.</p></div>
         <div className="foot-col"><h4>Shop</h4>{['Robux', 'Limiteds', 'V-Bucks', 'Valorant Points', 'Game Items'].map(x => <a key={x} href="#">{x}</a>)}</div>
         <div className="foot-col"><h4>Help</h4>{['Guides', 'Verified Badge', 'FAQ', 'Terms of Service', 'Privacy Policy', 'Discord'].map(x => <a key={x} href="#">{x}</a>)}</div>
-        <div className="foot-col"><h4>Payments</h4><div className="chips">{['Card', 'PayPal', 'Apple Pay', 'Cash App', 'BTC', 'ETH', 'LTC', 'USDT'].map(x => <span key={x} className="chip">{x}</span>)}</div></div>
+        <div className="foot-col"><h4>Payments</h4><div className="pay-icons">{['card', 'paypal', 'applepay', 'googlepay', 'cashapp', 'venmo', 'zelle', 'wise', 'paysafecard', 'btc', 'eth', 'ltc', 'sol', 'usdt'].map(x => <img key={x} src={`/icons/${x}.png`} alt={x} title={x} />)}</div></div>
       </div>
       <div className="foot-bottom"><span>© {new Date().getFullYear()} Bux Stock. All rights reserved.</span><span>Not affiliated with Roblox, Epic Games or Riot Games.</span></div>
     </div></footer>
@@ -160,7 +161,7 @@ export default function BuxApp() {
     <div className={'drawer-bg' + (drawer ? ' on' : '')} onClick={() => setDrawer(false)} />
     <aside className={'drawer' + (drawer ? ' on' : '')}>
       <div className="drawer-h"><h3>Your Cart</h3><button className="iconbtn" onClick={() => setDrawer(false)}><Ic n="x" /></button></div>
-      <div className="drawer-items">{cart.length ? cart.map((p, i) => <div className="ci" key={i}><div style={{ width: 52, height: 52, borderRadius: 10, background: p.logo[0], color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800 }}>{p.logo[1]}</div><div><div className="ci-n">{p.name}</div><div className="ci-p">{money(p.price)}</div></div><div className="ci-right"><span className="ci-rm" onClick={() => setCart(c => c.filter((_, j) => j !== i))}>Remove</span></div></div>) : <div className="empty">Your cart is empty</div>}</div>
+      <div className="drawer-items">{cart.length ? cart.map((p, i) => <div className="ci" key={i}><img src={`/icons/${p.id}.png`} alt="" /><div><div className="ci-n">{p.name}</div><div className="ci-p">{money(p.price)}</div></div><div className="ci-right"><span className="ci-rm" onClick={() => setCart(c => c.filter((_, j) => j !== i))}>Remove</span></div></div>) : <div className="empty">Your cart is empty</div>}</div>
       {cart.length > 0 && <div className="drawer-foot"><div className="drawer-sub"><span>Subtotal</span><b>{money(total)}</b></div><button className="btn btn-pri btn-lg">Checkout</button></div>}
     </aside>
 
@@ -171,6 +172,7 @@ export default function BuxApp() {
         <div><span className="hw-chip">Halloween drop · limited time</span></div>
         <h2>Spooky season is here</h2>
         <p className="hw-sub">New <b>MM2 Halloween items</b> just landed - plus a <b>Headless deal</b> on 31K Robux. Grab them before the season's gone!</p>
+        <div className="hw-tiles"><a className="hw-tile" href="#" onClick={() => setHw(false)}><img className="t-ic" src="/icons/opt/mm2.png" alt="" /><b>MM2 Halloween Items</b><small>Ember Set, Immortal Set &amp; more</small><span className="t-go">Shop now →</span></a><a className="hw-tile" href="#" onClick={() => setHw(false)}><img className="t-ic" src="/icons/robux.png" alt="" /><b>Headless Deal</b><small>31,000 Robux - exactly what Headless Horseman costs</small><span className="t-go">Get the deal →</span></a></div>
         <button className="btn btn-pri btn-lg hw-cta" onClick={() => setHw(false)}>🎃 Shop the Halloween drop</button>
         <button className="hw-later" onClick={() => setHw(false)}>Maybe later</button>
       </div>
